@@ -1,0 +1,291 @@
+% =====================================================================
+%  Figure 1. Stock-and-flow structure of the African field epidemiology
+%  workforce model.
+%
+%  Compiles on its own:   pdflatex fig1_stock_and_flow_tikz.tex
+%  Produces a tight-cropped PDF suitable for \includegraphics.
+%
+%  To drop into a manuscript instead, either
+%     \includegraphics[width=\textwidth]{fig1_stock_and_flow_tikz.pdf}
+%  or copy the tikzpicture environment and add to your preamble:
+%     \usepackage{tikz}
+%     \usetikzlibrary{arrows.meta,positioning,shapes.symbols,calc,fit,
+%                     backgrounds,decorations.markings}
+%
+%  Notation follows Sterman (2000, ch. 6): rectangles are stocks, thick
+%  arrows with a bow-tie valve are material flows, clouds are sources and
+%  sinks outside the model boundary, thin arrows are information links with
+%  + / - polarity, // marks a delay, and circled R / B mark reinforcing and
+%  balancing loops.
+% =====================================================================
+\documentclass[border=6pt,multi=tikzpicture]{standalone}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.symbols,calc,fit,backgrounds}
+
+% ----------------------------------------------------------- palette
+\definecolor{ink}      {HTML}{1D2026}
+\definecolor{stockfill}{HTML}{EEF2F7}
+\definecolor{stockedge}{HTML}{2B3A55}
+\definecolor{pipefill} {HTML}{F7F2E8}
+\definecolor{pipeedge} {HTML}{8A7A52}
+\definecolor{postfill} {HTML}{EAF3EE}
+\definecolor{postedge} {HTML}{2F6B4F}
+\definecolor{flowcol}  {HTML}{39506F}
+\definecolor{infocol}  {HTML}{808A99}
+\definecolor{rloop}    {HTML}{B23A2E}
+\definecolor{bloop}    {HTML}{1F6F8B}
+\definecolor{cloudedge}{HTML}{9AA3B0}
+\definecolor{muted}    {HTML}{6B7585}
+\definecolor{sectorcol}{HTML}{B3BBC7}
+\definecolor{rtint}    {HTML}{FDF0EE}
+\definecolor{btint}    {HTML}{EEF5F8}
+
+% ----------------------------------------------------------- styles
+\tikzset{
+  >={Latex[length=2.4mm,width=1.9mm]},
+  stock/.style={
+    draw=stockedge, fill=stockfill, line width=1pt, rounded corners=1.5pt,
+    align=center, inner sep=4pt, minimum width=26mm, minimum height=11mm,
+    text=ink, font=\sffamily\small},
+  pipe/.style={stock, draw=pipeedge, fill=pipefill,
+    minimum width=21mm, minimum height=9.5mm, font=\sffamily\footnotesize},
+  poststock/.style={stock, draw=postedge, fill=postfill,
+    minimum width=31mm, font=\sffamily\small},
+  aux/.style={
+    draw=#1, fill=white, line width=.6pt, rounded corners=2pt,
+    align=center, inner sep=3.2pt, text=ink, font=\sffamily\scriptsize},
+  aux/.default=sectorcol,
+  rbox/.style={aux=rloop, fill=rtint},
+  bbox/.style={aux=bloop, fill=btint},
+  dbox/.style={aux=sectorcol, fill=stockfill},
+  cloudy/.style={
+    cloud, draw=cloudedge, fill=white, line width=.8pt, aspect=2.1,
+    cloud puffs=10, minimum width=15mm, minimum height=9mm},
+  flow/.style={draw=#1, line width=2.1pt, -{Latex[length=3.1mm,width=3.1mm]}},
+  flow/.default=flowcol,
+  info/.style={draw=#1, line width=.6pt, -{Latex[length=1.9mm,width=1.5mm]}},
+  info/.default=infocol,
+  infoR/.style={info=rloop, line width=.75pt},
+  infoB/.style={info=bloop, line width=.75pt},
+  flab/.style={font=\sffamily\scriptsize\bfseries, text=flowcol,
+    fill=white, inner sep=1.2pt},
+  note/.style={font=\sffamily\scriptsize\itshape, text=muted, align=center},
+  sgn/.style={font=\sffamily\footnotesize\bfseries, inner sep=1pt,
+    fill=white, fill opacity=.85, text opacity=1},
+  dly/.style={font=\sffamily\footnotesize, inner sep=1pt, fill=white},
+  sectitle/.style={font=\sffamily\scriptsize\bfseries, text=sectorcol,
+    anchor=west},
+  loopcap/.style={font=\sffamily\scriptsize\bfseries, align=center,
+    fill=white, fill opacity=.9, text opacity=1, inner sep=1.5pt},
+}
+
+% bow-tie valve on a flow
+\tikzset{
+  pics/valve/.style={code={
+    \filldraw[fill=white, draw=#1, line width=.75pt]
+      (0,0) -- (-1.7mm, 1.35mm) -- (-1.7mm,-1.35mm) -- cycle;
+    \filldraw[fill=white, draw=#1, line width=.75pt]
+      (0,0) -- ( 1.7mm, 1.35mm) -- ( 1.7mm,-1.35mm) -- cycle;
+  }},
+  pics/valve/.default=flowcol,
+}
+
+% circled loop identifier with a curved arrow inside
+\tikzset{
+  pics/loop/.style 2 args={code={
+    \filldraw[fill=white, draw=#1, line width=1pt] (0,0) circle (3.4mm);
+    \draw[#1, line width=.6pt, -{Latex[length=1.5mm,width=1.3mm]}]
+      (70:2.3mm) arc (70:-230:2.3mm);
+    \node[font=\sffamily\scriptsize\bfseries, text=#1] at (0,0) {#2};
+  }},
+}
+
+\begin{document}
+\begin{tikzpicture}[x=1cm, y=1cm, font=\sffamily]
+
+% =================================================== sector backdrops
+\begin{scope}[on background layer]
+  \draw[sectorcol, dashed, line width=.5pt, rounded corners=2pt]
+    (-0.2,4.75) rectangle (12.5,16.15);
+  \draw[sectorcol, dashed, line width=.5pt, rounded corners=2pt]
+    (13.0,10.15) rectangle (26.4,16.15);
+  \draw[sectorcol, dashed, line width=.5pt, rounded corners=2pt]
+    (13.0,4.75) rectangle (26.4,9.75);
+  \draw[sectorcol, dashed, line width=.5pt, rounded corners=2pt]
+    (-0.2,1.15) rectangle (12.5,4.35);
+\end{scope}
+\node[sectitle] at (0.0,15.85) {SUPPLY $\cdot$ training pipeline and workforce stocks};
+\node[sectitle] at (13.2,15.85) {DEMAND $\cdot$ compliance and capability accounts};
+\node[sectitle] at (13.2,9.45)  {ESTABLISHMENT $\cdot$ posts and absorption};
+\node[sectitle] at (0.0,4.05)   {TRAINING CAPACITY $\cdot$ the mentor constraint};
+
+% =================================================== supply: three tiers
+\foreach \y/\name/\dur/\id in {%
+    14.55/FRONTLINE/3 months/FL,
+    11.40/INTERMEDIATE/9 months/IM,
+     8.25/ADVANCED/24 months/AD}{
+  \node[cloudy]                      (src\id)  at (0.95,\y) {};
+  \node[pipe]                        (pipe\id) at (3.75,\y)
+        {In training\\[-1pt]{\itshape\tiny \dur}};
+  \node[stock]                       (\id)     at (7.70,\y)
+        {\textbf{\name}\\[-1pt]{\itshape\tiny serving workforce}};
+  \node[cloudy]                      (snk\id)  at (11.55,\y) {};
+  \draw[flow] (src\id) -- (pipe\id);
+  \pic at ($(src\id)!0.5!(pipe\id)$) {valve};
+  \node[flab] at ($(src\id)!0.5!(pipe\id)+(0,0.42)$) {intake};
+  \draw[flow] (pipe\id) -- (\id);
+  \pic at ($(pipe\id)!0.5!(\id)$) {valve};
+  \node[flab] at ($(pipe\id)!0.5!(\id)+(0,0.42)$) {graduation};
+  \draw[flow] (\id) -- (snk\id);
+  \pic at ($(\id)!0.45!(snk\id)$) {valve};
+  \node[flab] at ($(\id)!0.45!(snk\id)+(0,0.42)$) {exits};
+}
+\node[note, anchor=south] at (5.72,15.15)
+  {$\times$ completion rate\\[-2pt]$\times$ public-service entry share};
+\node[note, anchor=north] at (10.35,14.08)
+  {attrition $\cdot$ emigration\\[-2pt]mortality $\cdot$ retirement};
+
+% progression between tiers
+\draw[flow, line width=1.6pt] (FL) -- (IM);
+\pic at ($(FL)!0.5!(IM)$) {valve};
+\node[flab, anchor=west] at ($(FL)!0.5!(IM)+(0.33,0)$) {progression};
+\draw[flow, line width=1.6pt] (IM) -- (AD);
+\pic at ($(IM)!0.5!(AD)$) {valve};
+\node[flab, anchor=west] at ($(IM)!0.5!(AD)+(0.33,0)$) {progression};
+\node[note, anchor=north west] at ($(FL)!0.5!(IM)+(0.33,-0.22)$)
+  {(promoted staff leave\\[-2pt]the tier below)};
+
+% the single auxiliary through which both rate loops act
+\node[rbox, text width=23mm] (RATE) at (10.95,9.75)
+  {Attrition rate \&\\ emigration hazard\\ (unplaced-weighted)};
+\draw[infoR] (RATE) to[out=80,in=-55] node[sgn,pos=.55,right]{$+$}
+  ($(FL)!0.45!(snkFL)+(0,-0.22)$);
+\draw[infoR] (RATE) to[out=135,in=-30] node[sgn,pos=.5,above]{$+$}
+  ($(IM)!0.45!(snkIM)+(0.1,-0.2)$);
+\draw[infoR] (RATE) to[out=-110,in=35] node[sgn,pos=.5,right]{$+$}
+  ($(AD)!0.45!(snkAD)+(0.1,0.22)$);
+
+% =================================================== demand
+\node[dbox, text width=25mm] (POP)  at (14.85,15.10) {Population\\(UN WPP 2024)};
+\node[dbox, text width=34mm] (JEE)  at (20.30,15.10) {JEE target heads\\$=$ population $/$ 200{,}000};
+\node[aux,  text width=25mm] (DRV)  at (14.85,13.35) {Outbreak events,\\reporting units,\\readiness};
+\node[dbox, text width=34mm] (WL)   at (20.30,13.35) {Workload demand\\(advanced-equivalent FTE)};
+\node[dbox, text width=34mm] (CAP)  at (20.30,11.35) {Effective capability\\(FTE, skill-weighted)};
+\node[rbox, text width=11mm] (LOAD) at (25.15,12.35) {Load\\ratio};
+
+\draw[info] (POP) -- node[sgn,above]{$+$} (JEE);
+\draw[info] (POP) -- node[sgn,right]{$+$} (DRV);
+\draw[info] (DRV) -- node[sgn,above]{$+$} (WL);
+\draw[infoR] (WL)  to[out=-20,in=130] node[sgn,pos=.5,above]{$+$} (LOAD);
+\draw[infoR] (CAP) to[out=20,in=-130] node[sgn,pos=.5,below]{$-$} (LOAD);
+\node[note, anchor=north] at (20.30,10.75)
+  {skill weight $\times$ protected time $\times$ active share};
+
+\draw[info] (FL) to[out=-25,in=175] (CAP);
+\draw[info] (IM) to[out=-20,in=182] (CAP);
+\draw[info] (AD) to[out=15,in=190]  (CAP);
+
+% R2 closes: load ratio -> exit rates
+\draw[infoR] (LOAD) to[out=-110,in=-5] node[sgn,pos=.62,below]{$+$} (RATE);
+\pic at (25.30,11.25) {loop={rloop}{R2}};
+\node[loopcap, text=rloop, anchor=north] at (25.30,10.78) {Burnout spiral};
+
+% =================================================== establishment
+\node[bbox, text width=44mm] (PRESS) at (17.25,8.68)
+  {Perceived pressure (delayed)\\
+   $=(\text{ambition}\times\text{target}-\text{deployed})$\\
+   $\quad -\,\zeta\times\text{vacancy}$};
+\draw[infoB] (JEE) to[out=-150,in=70] node[dly,pos=.50,sloped]{$/\!/$}
+  node[sgn,pos=.85,left]{$+$} (PRESS);
+
+\node[cloudy] (srcP) at (13.95,7.25) {};
+\node[poststock] (POSTS) at (18.30,7.25)
+  {\textbf{ESTABLISHED POSTS}\\[-1pt]{\itshape\tiny funded establishment}};
+\draw[flow=postedge] (srcP) -- (POSTS);
+\pic at ($(srcP)!0.5!(POSTS)$) {valve=postedge};
+\node[flab, text=postedge] at ($(srcP)!0.5!(POSTS)+(-0.30,0.45)$) {post creation};
+\draw[infoB] (PRESS) to[out=-150,in=70] node[sgn,pos=.5,left]{$+$}
+  ($(srcP)!0.5!(POSTS)+(0,0.18)$);
+
+\node[dbox, text width=24mm] (DEP) at (23.60,7.25)
+  {Deployed\\$=\min($trained,\\funded posts$)$};
+\draw[info] (POSTS) -- node[sgn,above]{$+$} (DEP);
+
+\node[rbox, text width=37mm] (UNP) at (18.00,5.60)
+  {Unplaced graduates, by tier\\(posts allocated advanced-first)};
+\draw[infoR] (POSTS) -- node[sgn,right]{$-$} (UNP);
+\draw[infoR] (AD) to[out=-40,in=170] node[sgn,pos=.2,below]{$+$} (UNP);
+
+\node[bbox, text width=30mm] (VAC) at (23.60,5.60)
+  {Vacancy\\$=$ funded posts $-$ deployed};
+\draw[infoB] (POSTS) to[out=-30,in=160] node[sgn,pos=.5,above]{$+$} (VAC);
+\draw[infoB] (DEP)   -- node[sgn,right]{$-$} (VAC);
+\draw[infoB] (VAC) to[out=100,in=-20] node[sgn,pos=.45,below]{$-$} (PRESS);
+\draw[infoB] (DEP) to[out=120,in=-10] node[sgn,pos=.5,above]{$-$} (PRESS);
+
+% R3 closes: unplaced -> emigration hazard
+\draw[infoR] (UNP) to[out=203,in=-82] node[sgn,pos=.45,below]{$+$} (RATE);
+\pic at (13.55,3.30) {loop={rloop}{R3}};
+\node[loopcap, text=rloop, anchor=north] at (13.55,2.80)
+  {Unplaced-graduate\\emigration};
+
+\pic at (24.95,9.05) {loop={bloop}{B1}};
+\node[loopcap, text=bloop, anchor=north] at (24.95,8.60)
+  {Establishment\\response};
+
+% =================================================== training capacity
+\node[rbox, text width=45mm] (TCAP) at (4.55,2.80)
+  {Training capacity\\$=$ mentors $\times$ residents per mentor\\$+$ regional-hub places};
+\node[rbox, text width=42mm] (MPOOL) at (9.60,2.80)
+  {Mentor pool\\$=$ advanced stock $\times$ mentor share};
+\draw[infoR] (AD) to[out=-80,in=60] node[sgn,pos=.6,right]{$+$} (MPOOL);
+\draw[infoR] (MPOOL) -- node[sgn,above]{$+$} (TCAP);
+\draw[infoR] (TCAP) to[out=170,in=-120] node[sgn,pos=.55,left]{$+$}
+  ($(srcAD)!0.5!(pipeAD)+(0,-0.2)$);
+\node[note, anchor=south] at (3.05,4.95)
+  {advanced intake is capped\\[-2pt]by mentor capacity};
+\pic at (1.15,2.80) {loop={rloop}{R1}};
+\node[loopcap, text=rloop, anchor=north] at (1.15,2.30) {Mentor\\capacity trap};
+
+% =================================================== legend
+\begin{scope}[shift={(16.9,1.35)}]
+  \draw[sectorcol, line width=.5pt, rounded corners=2pt]
+    (-0.35,-1.15) rectangle (9.60,1.05);
+  \node[font=\sffamily\scriptsize\bfseries, anchor=west, text=ink]
+    at (-0.20,0.80) {NOTATION};
+
+  \node[stock, minimum width=9mm, minimum height=4.5mm, inner sep=1pt] at (0.25,0.35) {};
+  \node[anchor=west, font=\sffamily\scriptsize] at (0.80,0.35) {stock (accumulation)};
+
+  \draw[flow] (0.00,-0.15) -- (0.55,-0.15);
+  \pic at (0.27,-0.15) {valve};
+  \node[anchor=west, font=\sffamily\scriptsize] at (0.80,-0.15) {flow with valve (a rate)};
+
+  \draw[info] (0.00,-0.65) -- (0.55,-0.65);
+  \node[anchor=west, font=\sffamily\scriptsize] at (0.80,-0.65) {information link};
+
+  \node[cloudy, minimum width=9mm, minimum height=5mm] at (5.55,0.35) {};
+  \node[anchor=west, font=\sffamily\scriptsize] at (6.10,0.35) {source / sink};
+
+  \node[font=\sffamily\footnotesize] at (5.55,-0.15) {$/\!/$};
+  \node[anchor=west, font=\sffamily\scriptsize] at (6.10,-0.15) {delay};
+
+  \pic[scale=.62] at (5.55,-0.65) {loop={rloop}{R}};
+  \node[anchor=west, font=\sffamily\scriptsize] at (6.10,-0.65) {reinforcing};
+  \pic[scale=.62] at (7.95,-0.65) {loop={bloop}{B}};
+  \node[anchor=west, font=\sffamily\scriptsize] at (8.45,-0.65) {balancing};
+\end{scope}
+
+% =================================================== footer
+\node[note, anchor=north west, align=left] at (-0.2,0.95)
+  {Compliance account: heads (advanced $+$ intermediate) against the JEE
+   1:200{,}000 benchmark.\\[-2pt]
+   Capability account: advanced-equivalent FTE against modelled workload.
+   The two are never subtracted from one another.};
+
+\end{tikzpicture}
+\end{document}
